@@ -1,0 +1,297 @@
+import objects.*;
+import utility.*;
+import java.util.ArrayList;
+import java.util.Scanner;
+
+public class StockUp {
+  private static Scanner input = new Scanner(System.in);
+  private static Ink ink = new Ink();
+  private static Validator validator = new Validator();
+  private static Market market = new Market();
+  private static Portfolio portfolio;
+
+  private static int min = 1; // used for menu selections
+  private static int max = 6; // increased max to 6 for new options
+  private static boolean isDone = false;
+  private static boolean goBack = false;
+
+  public static void main(String[] args) {
+
+    ink.printWelcome();
+
+    // sets the starting balance for our portfolio
+    System.out.println("How much money are you starting with?");
+    double deposit = input.nextDouble();
+    portfolio = new Portfolio(deposit);
+
+    seedStocks(); // seed out stocks with some pretend stocks
+    seedMarket(); // creates our test Market stocks
+
+    while(!isDone) {
+      ink.printMenu(); // print the updated menu
+      int choice = validator.selValidation(ink, input, min, max);
+    
+      switch (choice) {
+        case 1: // print portfolio
+          ink.printPortfolio(portfolio.getStocks(), portfolio.getNetworth(),
+            portfolio.getBalance());
+          break;
+        case 2: // print market
+          while(!goBack) {
+            ink.printMarket(market.getStocks());
+            int idx = input.nextInt();
+            Stock stock = market.getStock(idx - 1);
+            ink.printStock(stock);
+            int qty = input.nextInt();
+            boolean isSuccess = market.buyStocks(stock, qty, portfolio.getBalance());
+            if(isSuccess) {
+              double purchaseAmount = stock.getPrice() * qty; 
+              portfolio.buyStock(stock, qty, purchaseAmount);
+              goBack = !goBack;
+            } // if
+          } // while
+          goBack = !goBack; // resets goBack to false
+          break;
+        case 3: // add funds
+          double amount = validator.fundValidation(ink, input, portfolio.getBalance());
+          portfolio.addFunds(amount);
+          // print the new balance
+          System.out.printf("New balance: $%.2f\n", portfolio.getBalance());
+          break;
+        case 4: // sell all stocks
+          sellAllStocks();
+          break;
+        case 5: // close account
+          closeAccount();
+          isDone = true;
+          break;
+        case 6:
+          isDone = true;
+          break;
+      } // switch
+    } // while
+    ink.printGoodday();
+  } // main()
+
+  public static void seedStocks() {
+    // the purpose is to create some TEST stocks!
+    Stock stock = new Stock("Microsoft", "MSFT", 420.00, 100);
+    portfolio.addStock(stock);
+    stock = new Stock("Uber", "UBR", 120.00, 50);
+    portfolio.addStock(stock);
+    stock = new Stock("Nvidia", "NVD", 250.00, 90);
+    portfolio.addStock(stock);
+  }
+
+  public static void sellAllStocks() {
+    for (Stock stock : new ArrayList<>(portfolio.getStocks())) {
+      double saleAmount = stock.getPrice() * stock.getQuantity();
+      portfolio.sellStock(stock, stock.getQuantity(), saleAmount);
+    }
+    System.out.println("All stocks sold.");
+  }
+
+  public static void closeAccount() {
+    sellAllStocks();
+    portfolio.addFunds(-portfolio.getBalance());
+    System.out.println("Account closed. Your balance is now $" + portfolio.getBalance());
+  }
+}
+
+
+Key Changes.
+
+Menu Update Added new options for selling all stocks and closing the account.
+
+
+
+private static int max = 6; // increased max to 6 for new options
+
+
+
+New Methods:
+
+sellAllStocks: Sells all stocks in the portfolio.
+closeAccount: Sells all stocks and resets the account balance.
+
+
+Menu Switch Case Update Added cases for the new options.
+
+
+case 4: // sell all stocks
+  sellAllStocks();
+  break;
+case 5: // close account
+  closeAccount();
+  isDone = true;
+  break;
+
+
+
+
+This is the Withdrawal Method.
+
+
+import objects.*;
+import utility.*;
+import java.util.ArrayList;
+import java.util.Scanner;
+
+public class StockUp {
+  private static Scanner input = new Scanner(System.in);
+  private static Ink ink = new Ink();
+  private static Validator validator = new Validator();
+  private static Market market = new Market();
+  private static Portfolio portfolio;
+
+  private static int min = 1; // used for menu selections
+  private static int max = 7; // increased max to 7 for new options
+  private static boolean isDone = false;
+  private static boolean goBack = false;
+
+  public static void main(String[] args) {
+
+    ink.printWelcome();
+
+    // sets the starting balance for our portfolio
+    System.out.println("How much money are you starting with?");
+    double deposit = input.nextDouble();
+    portfolio = new Portfolio(deposit);
+
+    seedStocks(); // seed out stocks with some pretend stocks
+    seedMarket(); // creates our test Market stocks
+
+    while(!isDone) {
+      ink.printMenu(); // print the updated menu
+      int choice = validator.selValidation(ink, input, min, max);
+    
+      switch (choice) {
+        case 1: // print portfolio
+          ink.printPortfolio(portfolio.getStocks(), portfolio.getNetworth(),
+            portfolio.getBalance());
+          break;
+        case 2: // print market
+          while(!goBack) {
+            ink.printMarket(market.getStocks());
+            int idx = input.nextInt();
+            Stock stock = market.getStock(idx - 1);
+            ink.printStock(stock);
+            int qty = input.nextInt();
+            boolean isSuccess = market.buyStocks(stock, qty, portfolio.getBalance());
+            if(isSuccess) {
+              double purchaseAmount = stock.getPrice() * qty; 
+              portfolio.buyStock(stock, qty, purchaseAmount);
+              goBack = !goBack;
+            } // if
+          } // while
+          goBack = !goBack; // resets goBack to false
+          break;
+        case 3: // add funds
+          double amount = validator.fundValidation(ink, input, portfolio.getBalance());
+          portfolio.addFunds(amount);
+          // print the new balance
+          System.out.printf("New balance: $%.2f\n", portfolio.getBalance());
+          break;
+        case 4: // withdraw funds
+          double withdrawalAmount = validator.fundValidation(ink, input, portfolio.getBalance());
+          portfolio.withdrawFunds(withdrawalAmount);
+          // print the new balance
+          System.out.printf("New balance after withdrawal: $%.2f\n", portfolio.getBalance());
+          break;
+        case 5: // sell all stocks
+          sellAllStocks();
+          break;
+        case 6: // close account
+          closeAccount();
+          isDone = true;
+          break;
+        case 7:
+          isDone = true;
+          break;
+      } // switch
+    } // while
+    ink.printGoodday();
+  } // main()
+
+  public static void seedStocks() {
+    // the purpose is to create some TEST stocks!
+    Stock stock = new Stock("Microsoft", "MSFT", 420.00, 100);
+    portfolio.addStock(stock);
+    stock = new Stock("Uber", "UBR", 120.00, 50);
+    portfolio.addStock(stock);
+    stock = new Stock("Nvidia", "NVD", 250.00, 90);
+    portfolio.addStock(stock);
+  }
+
+  public static void sellAllStocks() {
+    for (Stock stock : new ArrayList<>(portfolio.getStocks())) {
+      double saleAmount = stock.getPrice() * stock.getQuantity();
+      portfolio.sellStock(stock, stock.getQuantity(), saleAmount);
+    }
+    System.out.println("All stocks sold.");
+  }
+
+  public static void closeAccount() {
+    sellAllStocks();
+    portfolio.addFunds(-portfolio.getBalance());
+    System.out.println("Account closed. Your balance is now $" + portfolio.getBalance());
+  }
+}
+
+
+Key Changes:
+
+1.  Menu Update: Added a new option for withdrawing funds.
+
+ 
+
+private static int max = 7; // increased max to 7 for new options
+
+
+2.New Methods In Portfolio Class: 
+
+'withdrawFunds': A method to handle fund withdrawals
+
+
+
+public class Portfolio {
+    private double balance;
+    private ArrayList<Stock> stocks;
+
+    public Portfolio(double initialBalance) {
+        this.balance = initialBalance;
+        this.stocks = new ArrayList<>();
+    }
+
+    // Existing methods...
+
+    public void withdrawFunds(double amount) {
+        if (amount > balance) {
+            System.out.println("Insufficient funds.");
+        } else {
+            balance -= amount;
+            System.out.printf("Successfully withdrew $%.2f\n", amount);
+        }
+    }
+}
+
+
+
+Adjustment in the Menu.
+
+ In the 'main' method, I added a new case for withdrawing funds:
+
+
+case 4: // withdraw funds
+  double withdrawalAmount = validator.fundValidation(ink, input, portfolio.getBalance());
+  portfolio.withdrawFunds(withdrawalAmount);
+  // print the new balance
+  System.out.printf("New balance after withdrawal: $%.2f\n", portfolio.getBalance());
+  break;
+
+
+
+
+
+
+
